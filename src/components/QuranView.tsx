@@ -27,6 +27,8 @@ const QuranView = () => {
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [loadingAyahs, setLoadingAyahs] = useState(false);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
+  const [playingFull, setPlayingFull] = useState(false);
+  const fullPlayIndexRef = useRef<number>(-1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
