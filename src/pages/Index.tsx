@@ -36,6 +36,8 @@ const Index = () => {
             <TasbihCounter />
           </div>
         );
+      case "quran":
+        return <QuranView />;
       case "learn":
         return <IstikharaGuide />;
       default:

@@ -57,6 +57,7 @@ const translations = {
     challengeComplete: "ما شاء الله! اكتمل التحدي!",
     youCompleted: "أكملت",
     dhikr: "ذكر",
+    quran: "القرآن",
     salatIstikhara: "صلاة الاستخارة",
     istikharaDesc: "صلاة طلب الهداية من الله عند مواجهة قرار مهم.",
     theDua: "الدعاء",
