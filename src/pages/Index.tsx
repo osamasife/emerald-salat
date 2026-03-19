@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { Languages } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import HomeView from "@/components/HomeView";
 import PrayerTimes from "@/components/PrayerTimes";
 import TasbihCounter from "@/components/TasbihCounter";
 import IstikharaGuide from "@/components/IstikharaGuide";
 import DateHeader from "@/components/DateHeader";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
+  const { t, toggleLang, lang } = useLanguage();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -24,10 +27,10 @@ const Index = () => {
         return (
           <div className="space-y-4">
             <h1 className="font-amiri text-2xl font-bold text-foreground">
-              Smart Tasbih
+              {t("smartTasbih")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Set your target, tap to count, feel the vibration.
+              {t("tasbihDesc")}
             </p>
             <TasbihCounter />
           </div>
@@ -44,9 +47,18 @@ const Index = () => {
       <header className="sticky top-0 z-40 border-b border-border bg-card/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
           <h1 className="font-amiri text-xl font-bold text-foreground">
-            Muslim<span className="text-accent"> Pro</span>
+            {t("appName")}<span className="text-accent">{t("appNameAccent")}</span>
           </h1>
-          <span className="text-lg">☪️</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleLang}
+              className="flex items-center gap-1.5 rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-muted"
+            >
+              <Languages size={14} />
+              {lang === "en" ? "عربي" : "EN"}
+            </button>
+            <span className="text-lg">☪️</span>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-lg px-4 pt-4">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Clock, MapPin, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Timings {
   Fajr: string;
@@ -14,15 +15,15 @@ interface Timings {
 const prayerNames: (keyof Timings)[] = ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
 const prayerIcons: Record<string, string> = {
-  Fajr: "🌅",
-  Sunrise: "☀️",
-  Dhuhr: "🌤️",
-  Asr: "⛅",
-  Maghrib: "🌇",
-  Isha: "🌙",
+  Fajr: "🌅", Sunrise: "☀️", Dhuhr: "🌤️", Asr: "⛅", Maghrib: "🌇", Isha: "🌙",
+};
+
+const prayerNamesAr: Record<string, string> = {
+  Fajr: "الفجر", Sunrise: "الشروق", Dhuhr: "الظهر", Asr: "العصر", Maghrib: "المغرب", Isha: "العشاء",
 };
 
 const PrayerTimes = () => {
+  const { t, lang } = useLanguage();
   const [city, setCity] = useState("Mecca");
   const [inputCity, setInputCity] = useState("");
   const [timings, setTimings] = useState<Timings | null>(null);
@@ -83,19 +84,19 @@ const PrayerTimes = () => {
 
       <form onSubmit={handleSearch} className="flex gap-2">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             value={inputCity}
             onChange={(e) => setInputCity(e.target.value)}
-            placeholder="Enter city..."
-            className="h-10 w-full rounded-xl border border-input bg-card pl-9 pr-3 text-sm text-foreground outline-none transition-shadow focus:ring-2 focus:ring-accent/40"
+            placeholder={t("enterCity")}
+            className="h-10 w-full rounded-xl border border-input bg-card ps-9 pe-3 text-sm text-foreground outline-none transition-shadow focus:ring-2 focus:ring-accent/40"
           />
         </div>
         <button
           type="submit"
           className="h-10 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-emerald-medium"
         >
-          Search
+          {t("search")}
         </button>
       </form>
 
@@ -116,7 +117,7 @@ const PrayerTimes = () => {
               <span className="text-xl">{prayerIcons[name]}</span>
               <div>
                 <p className={cn("text-xs font-medium", nextPrayer === name ? "text-accent" : "text-muted-foreground")}>
-                  {name}
+                  {lang === "ar" ? prayerNamesAr[name] : name}
                 </p>
                 <p className="text-base font-bold text-foreground">
                   {timings[name]?.split(" ")[0]}

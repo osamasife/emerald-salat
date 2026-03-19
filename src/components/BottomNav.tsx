@@ -1,5 +1,6 @@
 import { Clock, Hand, BookOpen, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BottomNavProps {
   activeTab: string;
@@ -7,13 +8,15 @@ interface BottomNavProps {
 }
 
 const tabs = [
-  { id: "home", label: "Home", icon: Home },
-  { id: "prayer", label: "Prayer", icon: Clock },
-  { id: "tasbih", label: "Tasbih", icon: Hand },
-  { id: "learn", label: "Learn", icon: BookOpen },
+  { id: "home", labelKey: "home" as const, icon: Home },
+  { id: "prayer", labelKey: "prayer" as const, icon: Clock },
+  { id: "tasbih", labelKey: "tasbih" as const, icon: Hand },
+  { id: "learn", labelKey: "learn" as const, icon: BookOpen },
 ];
 
 const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
+  const { t } = useLanguage();
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-lg">
       <div className="mx-auto flex max-w-lg items-center justify-around py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
@@ -31,7 +34,7 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
             >
               <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
               <span className={cn("text-[10px]", isActive && "font-semibold")}>
-                {tab.label}
+                {t(tab.labelKey)}
               </span>
             </button>
           );

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const DateHeader = () => {
+  const { lang } = useLanguage();
   const [hijriDate, setHijriDate] = useState("");
-  const gregorian = new Date().toLocaleDateString("en-US", {
+  const gregorian = new Date().toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -19,10 +21,13 @@ const DateHeader = () => {
       .then((r) => r.json())
       .then((data) => {
         const h = data?.data?.hijri;
-        if (h) setHijriDate(`${h.day} ${h.month.en} ${h.year} AH`);
+        if (h) {
+          const monthName = lang === "ar" ? h.month.ar : h.month.en;
+          setHijriDate(`${h.day} ${monthName} ${h.year} ${lang === "ar" ? "هـ" : "AH"}`);
+        }
       })
       .catch(() => setHijriDate(""));
-  }, []);
+  }, [lang]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-primary p-5 text-primary-foreground">
