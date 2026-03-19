@@ -106,6 +106,7 @@ const QuranView = () => {
   useEffect(() => {
     return () => {
       audioRef.current?.pause();
+      fullPlayIndexRef.current = -1;
     };
   }, []);
 
