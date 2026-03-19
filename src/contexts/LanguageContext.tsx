@@ -23,6 +23,7 @@ const translations = {
     challengeComplete: "Masha'Allah! Challenge Complete!",
     youCompleted: "You completed",
     dhikr: "dhikr",
+    quran: "Quran",
     salatIstikhara: "Salat Al-Istikhara",
     istikharaDesc: "The prayer of seeking guidance from Allah when facing an important decision.",
     theDua: "The Dua",
