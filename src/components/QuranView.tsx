@@ -52,7 +52,15 @@ const QuranView = () => {
     setLoadingAyahs(false);
   };
 
+  const stopAll = () => {
+    audioRef.current?.pause();
+    setPlayingAyah(null);
+    setPlayingFull(false);
+    fullPlayIndexRef.current = -1;
+  };
+
   const toggleAudio = (ayah: Ayah) => {
+    if (playingFull) stopAll();
     if (playingAyah === ayah.numberInSurah) {
       audioRef.current?.pause();
       setPlayingAyah(null);
@@ -64,6 +72,35 @@ const QuranView = () => {
     audio.play();
     setPlayingAyah(ayah.numberInSurah);
     audio.onended = () => setPlayingAyah(null);
+  };
+
+  const playFullSurah = () => {
+    if (playingFull) {
+      stopAll();
+      return;
+    }
+    if (ayahs.length === 0) return;
+    setPlayingFull(true);
+    fullPlayIndexRef.current = 0;
+    playAyahAt(0);
+  };
+
+  const playAyahAt = (index: number) => {
+    if (index >= ayahs.length) {
+      stopAll();
+      return;
+    }
+    const ayah = ayahs[index];
+    if (audioRef.current) audioRef.current.pause();
+    const audio = new Audio(ayah.audio);
+    audioRef.current = audio;
+    setPlayingAyah(ayah.numberInSurah);
+    audio.play();
+    audio.onended = () => {
+      const next = fullPlayIndexRef.current + 1;
+      fullPlayIndexRef.current = next;
+      playAyahAt(next);
+    };
   };
 
   useEffect(() => {
