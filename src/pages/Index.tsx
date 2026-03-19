@@ -5,6 +5,7 @@ import HomeView from "@/components/HomeView";
 import PrayerTimes from "@/components/PrayerTimes";
 import TasbihCounter from "@/components/TasbihCounter";
 import IstikharaGuide from "@/components/IstikharaGuide";
+import QuranView from "@/components/QuranView";
 import DateHeader from "@/components/DateHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
 
