@@ -1,4 +1,4 @@
-import { Clock, Hand, BookOpen, Home } from "lucide-react";
+import { Clock, Hand, BookOpen, Home, BookOpenText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -11,6 +11,7 @@ const tabs = [
   { id: "home", labelKey: "home" as const, icon: Home },
   { id: "prayer", labelKey: "prayer" as const, icon: Clock },
   { id: "tasbih", labelKey: "tasbih" as const, icon: Hand },
+  { id: "quran", labelKey: "quran" as const, icon: BookOpenText },
   { id: "learn", labelKey: "learn" as const, icon: BookOpen },
 ];
 
