@@ -1,4 +1,4 @@
-import { Clock, Hand, BookOpen, Home } from "lucide-react";
+import { Clock, Hand, BookOpen, Home, BookOpenText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
