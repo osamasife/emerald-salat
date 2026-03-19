@@ -1,10 +1,12 @@
 import { useState, useCallback } from "react";
 import { RotateCcw, Trophy, Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const presets = [33, 99, 100];
 
 const TasbihCounter = () => {
+  const { t } = useLanguage();
   const [target, setTarget] = useState(33);
   const [count, setCount] = useState(33);
   const [victory, setVictory] = useState(false);
@@ -51,17 +53,17 @@ const TasbihCounter = () => {
           سبحان الله
         </h2>
         <p className="text-lg font-semibold text-accent">
-          Masha'Allah! Challenge Complete!
+          {t("challengeComplete")}
         </p>
         <p className="text-sm text-muted-foreground">
-          You completed {target} dhikr
+          {t("youCompleted")} {target} {t("dhikr")}
         </p>
         <button
           onClick={reset}
           className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors hover:bg-emerald-medium"
         >
           <RotateCcw size={18} />
-          New Challenge
+          {t("newChallenge")}
         </button>
       </div>
     );
@@ -90,18 +92,16 @@ const TasbihCounter = () => {
         <button onClick={() => adjustTarget(-1)} className="rounded-full bg-secondary p-2 text-secondary-foreground">
           <Minus size={16} />
         </button>
-        <span className="text-sm text-muted-foreground">Target: {target}</span>
+        <span className="text-sm text-muted-foreground">{t("target")}: {target}</span>
         <button onClick={() => adjustTarget(1)} className="rounded-full bg-secondary p-2 text-secondary-foreground">
           <Plus size={16} />
         </button>
       </div>
 
-      {/* Main tap circle */}
       <button
         onClick={handleTap}
         className="relative flex h-48 w-48 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-2xl transition-transform active:scale-95"
       >
-        {/* Progress ring */}
         <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="92" fill="none" stroke="hsl(var(--border))" strokeWidth="6" opacity="0.3" />
           <circle
@@ -114,13 +114,13 @@ const TasbihCounter = () => {
         </svg>
         <div className="flex flex-col items-center">
           <span className="text-5xl font-bold">{count}</span>
-          <span className="mt-1 text-xs uppercase tracking-wider opacity-70">Tap</span>
+          <span className="mt-1 text-xs uppercase tracking-wider opacity-70">{t("tap")}</span>
         </div>
       </button>
 
       <button onClick={reset} className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
         <RotateCcw size={14} />
-        Reset
+        {t("reset")}
       </button>
     </div>
   );
