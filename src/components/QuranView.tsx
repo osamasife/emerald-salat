@@ -27,6 +27,8 @@ const QuranView = () => {
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [loadingAyahs, setLoadingAyahs] = useState(false);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
+  const [playingFull, setPlayingFull] = useState(false);
+  const fullPlayIndexRef = useRef<number>(-1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -50,7 +52,15 @@ const QuranView = () => {
     setLoadingAyahs(false);
   };
 
+  const stopAll = () => {
+    audioRef.current?.pause();
+    setPlayingAyah(null);
+    setPlayingFull(false);
+    fullPlayIndexRef.current = -1;
+  };
+
   const toggleAudio = (ayah: Ayah) => {
+    if (playingFull) stopAll();
     if (playingAyah === ayah.numberInSurah) {
       audioRef.current?.pause();
       setPlayingAyah(null);
@@ -64,9 +74,39 @@ const QuranView = () => {
     audio.onended = () => setPlayingAyah(null);
   };
 
+  const playFullSurah = () => {
+    if (playingFull) {
+      stopAll();
+      return;
+    }
+    if (ayahs.length === 0) return;
+    setPlayingFull(true);
+    fullPlayIndexRef.current = 0;
+    playAyahAt(0);
+  };
+
+  const playAyahAt = (index: number) => {
+    if (index >= ayahs.length) {
+      stopAll();
+      return;
+    }
+    const ayah = ayahs[index];
+    if (audioRef.current) audioRef.current.pause();
+    const audio = new Audio(ayah.audio);
+    audioRef.current = audio;
+    setPlayingAyah(ayah.numberInSurah);
+    audio.play();
+    audio.onended = () => {
+      const next = fullPlayIndexRef.current + 1;
+      fullPlayIndexRef.current = next;
+      playAyahAt(next);
+    };
+  };
+
   useEffect(() => {
     return () => {
       audioRef.current?.pause();
+      fullPlayIndexRef.current = -1;
     };
   }, []);
 
@@ -75,10 +115,9 @@ const QuranView = () => {
       <div className="space-y-4">
         <button
           onClick={() => {
+            stopAll();
             setSelectedSurah(null);
             setAyahs([]);
-            audioRef.current?.pause();
-            setPlayingAyah(null);
           }}
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
@@ -97,6 +136,20 @@ const QuranView = () => {
             {selectedSurah.numberOfAyahs} {lang === "ar" ? "آية" : "Ayahs"} · {selectedSurah.revelationType}
           </p>
         </div>
+
+        {!loadingAyahs && ayahs.length > 0 && (
+          <div className="flex justify-center">
+            <button
+              onClick={playFullSurah}
+              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              {playingFull ? <Pause size={16} /> : <Play size={16} />}
+              {playingFull
+                ? (lang === "ar" ? "إيقاف" : "Stop")
+                : (lang === "ar" ? "تشغيل السورة كاملة" : "Play Full Surah")}
+            </button>
+          </div>
+        )}
 
         {loadingAyahs ? (
           <div className="flex justify-center py-12">
