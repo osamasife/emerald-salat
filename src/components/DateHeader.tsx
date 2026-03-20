@@ -1,50 +1,67 @@
-import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
+import { Star, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const DateHeader = () => {
   const { lang } = useLanguage();
-  const [hijriDate, setHijriDate] = useState("");
-  const gregorian = new Date().toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const today = new Date();
 
-  useEffect(() => {
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-    fetch(`https://api.aladhan.com/v1/gpiToH/${dd}-${mm}-${yyyy}`)
-      .then((r) => r.json())
-      .then((data) => {
-        const h = data?.data?.hijri;
-        if (h) {
-          const monthName = lang === "ar" ? h.month.ar : h.month.en;
-          setHijriDate(`${h.day} ${monthName} ${h.year} ${lang === "ar" ? "هـ" : "AH"}`);
-        }
-      })
-      .catch(() => setHijriDate(""));
-  }, [lang]);
+  // 1. التاريخ الميلادي
+  const gregorian = today.toLocaleDateString(
+    lang === "ar" ? "ar-SA" : "en-US",
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
+  );
+
+  // 2. التاريخ الهجري (مع معالجة تكرار "هـ")
+  let hijriDate = new Intl.DateTimeFormat(
+    lang === "ar"
+      ? "ar-SA-u-ca-islamic-umalqura"
+      : "en-US-u-ca-islamic-umalqura",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    },
+  ).format(today);
+
+  // تنظيف النص: إذا كان التاريخ يحتوي بالفعل على "هـ" أو "AH"، لا نضيفها مرة أخرى
+  const hasSuffix = hijriDate.includes("هـ") || hijriDate.includes("AH");
+  const finalHijri = hasSuffix
+    ? hijriDate
+    : `${hijriDate} ${lang === "ar" ? "هـ" : "AH"}`;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-primary p-5 text-primary-foreground">
-      <div className="absolute -right-6 -top-6 opacity-10">
-        <Star size={120} />
+    <div className="relative overflow-hidden rounded-2xl bg-primary p-6 text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300">
+      {/* زخرفة خلفية */}
+      <div className="absolute -right-6 -top-6 opacity-10 rotate-12">
+        <Star size={140} />
       </div>
-      <p className="text-xs font-medium uppercase tracking-widest text-gold-light">
-        {gregorian}
-      </p>
-      {hijriDate && (
-        <p className="font-amiri mt-1 text-xl font-bold text-accent">
-          {hijriDate}
+
+      {/* التاريخ الميلادي - خط أصغر وشفافية بسيطة */}
+      <div className="mb-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
+          {gregorian}
         </p>
-      )}
-      <p className="mt-2 font-amiri text-sm italic opacity-80">
-        "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"
-      </p>
+      </div>
+
+      {/* التاريخ الهجري - واضح وأنيق */}
+      <div className="flex items-center gap-2">
+        <Calendar size={18} className="text-accent shrink-0" />
+        <p className="font-amiri text-2xl font-bold text-white leading-tight">
+          {finalHijri}
+        </p>
+      </div>
+
+      {/* البسملة - بلون ذهبي (Accent) وخط واضح جداً */}
+      <div className="mt-4 flex flex-col items-center border-t border-white/10 pt-4">
+        <p className="font-amiri text-2xl font-bold text-accent drop-shadow-sm">
+          بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+        </p>
+      </div>
     </div>
   );
 };

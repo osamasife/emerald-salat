@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
 
 type Lang = "en" | "ar";
 
@@ -8,7 +14,7 @@ const translations = {
     appNameAccent: " Pro",
     home: "Home",
     prayer: "Prayer",
-    tasbih: "Tasbih",
+    tasbih: "Dhikr & Tasbih",
     learn: "Learn",
     smartTasbih: "Smart Tasbih",
     tasbihDesc: "Set your target, tap to count, feel the vibration.",
@@ -25,24 +31,30 @@ const translations = {
     dhikr: "dhikr",
     quran: "Quran",
     salatIstikhara: "Salat Al-Istikhara",
-    istikharaDesc: "The prayer of seeking guidance from Allah when facing an important decision.",
+    istikharaDesc:
+      "The prayer of seeking guidance from Allah when facing an important decision.",
     theDua: "The Dua",
     makeWudu: "Make Wudu",
-    makeWuduDesc: "Perform ablution (wudu) to purify yourself before the prayer.",
+    makeWuduDesc:
+      "Perform ablution (wudu) to purify yourself before the prayer.",
     prayTwoRakahs: "Pray Two Rak'ahs",
-    prayTwoRakahsDesc: "Pray two voluntary rak'ahs of prayer. It is recommended to recite Surah Al-Kafirun in the first rak'ah and Surah Al-Ikhlas in the second.",
+    prayTwoRakahsDesc:
+      "Pray two voluntary rak'ahs of prayer. It is recommended to recite Surah Al-Kafirun in the first rak'ah and Surah Al-Ikhlas in the second.",
     reciteDua: "Recite the Istikhara Dua",
-    reciteDuaDesc: "After completing the two rak'ahs, recite the Istikhara supplication with sincerity and conviction.",
+    reciteDuaDesc:
+      "After completing the two rak'ahs, recite the Istikhara supplication with sincerity and conviction.",
     trustAllah: "Trust in Allah",
-    trustAllahDesc: "After making the dua, proceed with your decision. Trust that Allah will guide you to what is best. Signs may come through feelings, circumstances, or dreams.",
-    duaTranslation: '"O Allah, I seek Your guidance by virtue of Your knowledge, and I seek ability by virtue of Your power, and I ask You of Your great bounty. You have power, I have none. And You know, I know not. You are the Knower of hidden things."',
+    trustAllahDesc:
+      "After making the dua, proceed with your decision. Trust that Allah will guide you to what is best. Signs may come through feelings, circumstances, or dreams.",
+    duaTranslation:
+      '"O Allah, I seek Your guidance by virtue of Your knowledge, and I seek ability by virtue of Your power, and I ask You of Your great bounty. You have power, I have none. And You know, I know not. You are the Knower of hidden things."',
   },
   ar: {
     appName: "مسلم",
     appNameAccent: " برو",
     home: "الرئيسية",
     prayer: "الصلاة",
-    tasbih: "التسبيح",
+    tasbih: "تسبيح وأذكار",
     learn: "تعلّم",
     smartTasbih: "التسبيح الذكي",
     tasbihDesc: "حدد هدفك، انقر للعد، واشعر بالاهتزاز.",
@@ -64,12 +76,15 @@ const translations = {
     makeWudu: "الوضوء",
     makeWuduDesc: "توضأ لتطهير نفسك قبل الصلاة.",
     prayTwoRakahs: "صلاة ركعتين",
-    prayTwoRakahsDesc: "صلِّ ركعتين نافلتين. يُستحب قراءة سورة الكافرون في الركعة الأولى وسورة الإخلاص في الثانية.",
+    prayTwoRakahsDesc:
+      "صلِّ ركعتين نافلتين. يُستحب قراءة سورة الكافرون في الركعة الأولى وسورة الإخلاص في الثانية.",
     reciteDua: "قراءة دعاء الاستخارة",
     reciteDuaDesc: "بعد إتمام الركعتين، اقرأ دعاء الاستخارة بإخلاص ويقين.",
     trustAllah: "التوكل على الله",
-    trustAllahDesc: "بعد الدعاء، امضِ في قرارك. توكل على أن الله سيهديك إلى الأفضل. قد تأتي العلامات من خلال المشاعر أو الظروف أو الأحلام.",
-    duaTranslation: '"اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ الْغُيُوبِ"',
+    trustAllahDesc:
+      "بعد الدعاء، امضِ في قرارك. توكل على أن الله سيهديك إلى الأفضل. قد تأتي العلامات من خلال المشاعر أو الظروف أو الأحلام.",
+    duaTranslation:
+      '"اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ الْغُيُوبِ"',
   },
 } as const;
 
@@ -84,8 +99,14 @@ const LanguageContext = createContext<LanguageContextType | null>(null);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLang] = useState<Lang>("en");
-  const toggleLang = useCallback(() => setLang((l) => (l === "en" ? "ar" : "en")), []);
-  const t = useCallback((key: keyof typeof translations.en) => translations[lang][key], [lang]);
+  const toggleLang = useCallback(
+    () => setLang((l) => (l === "en" ? "ar" : "en")),
+    [],
+  );
+  const t = useCallback(
+    (key: keyof typeof translations.en) => translations[lang][key],
+    [lang],
+  );
   const isRTL = lang === "ar";
 
   return (

@@ -30,9 +30,7 @@ const Index = () => {
             <h1 className="font-amiri text-2xl font-bold text-foreground">
               {t("smartTasbih")}
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {t("tasbihDesc")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("tasbihDesc")}</p>
             <TasbihCounter />
           </div>
         );
@@ -50,7 +48,8 @@ const Index = () => {
       <header className="sticky top-0 z-40 border-b border-border bg-card/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
           <h1 className="font-amiri text-xl font-bold text-foreground">
-            {t("appName")}<span className="text-accent">{t("appNameAccent")}</span>
+            {t("appName")}
+            <span className="text-accent">{t("appNameAccent")}</span>
           </h1>
           <div className="flex items-center gap-3">
             <button
@@ -64,9 +63,7 @@ const Index = () => {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-lg px-4 pt-4">
-        {renderContent()}
-      </main>
+      <main className="mx-auto max-w-lg px-4 pt-4">{renderContent()}</main>
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );

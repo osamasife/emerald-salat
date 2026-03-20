@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Play, Pause, BookOpenText } from "lucide-react";
+import { ArrowLeft, Play, Pause, BookOpenText, Search, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 
 interface Surah {
   number: number;
@@ -9,172 +10,200 @@ interface Surah {
   englishName: string;
   englishNameTranslation: string;
   numberOfAyahs: number;
-  revelationType: string;
 }
 
 interface Ayah {
-  number: number;
   numberInSurah: number;
   text: string;
   audio: string;
 }
 
 const QuranView = () => {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const [surahs, setSurahs] = useState<Surah[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [loadingAyahs, setLoadingAyahs] = useState(false);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [playingFull, setPlayingFull] = useState(false);
-  const fullPlayIndexRef = useRef<number>(-1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fullPlayIndexRef = useRef<number>(0);
 
   useEffect(() => {
     fetch("https://api.alquran.cloud/v1/surah")
       .then((r) => r.json())
       .then((d) => setSurahs(d.data || []))
-      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
+  const normalizeText = (text: string) => {
+    return text
+      .replace(/[\u064B-\u0652]/g, "")
+      .replace(/[أإآ]/g, "ا")
+      .replace(/ة/g, "ه")
+      .toLowerCase();
+  };
+
+  const filteredSurahs = surahs.filter((s) => {
+    const normalizedQuery = normalizeText(searchQuery);
+    return (
+      normalizeText(s.name).includes(normalizedQuery) ||
+      s.englishName.toLowerCase().includes(normalizedQuery) ||
+      s.number.toString() === searchQuery
+    );
+  });
+
   const openSurah = async (surah: Surah) => {
+    stopAll();
     setSelectedSurah(surah);
     setLoadingAyahs(true);
     try {
-      const res = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/ar.alafasy`);
+      const res = await fetch(
+        `https://api.alquran.cloud/v1/surah/${surah.number}/ar.alafasy`,
+      );
       const data = await res.json();
       setAyahs(data.data?.ayahs || []);
-    } catch {
-      setAyahs([]);
+    } catch (e) {
+      console.error("Error fetching ayahs", e);
     }
     setLoadingAyahs(false);
   };
 
+  // --- دالة الإيقاف المحسنة ---
   const stopAll = () => {
-    audioRef.current?.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.onended = null; // أهم خطوة: إلغاء الحدث قبل مسح المصدر
+      audioRef.current.src = "";
+      audioRef.current.load(); // إجبار المتصفح على تفريغ الملف
+    }
     setPlayingAyah(null);
     setPlayingFull(false);
     fullPlayIndexRef.current = -1;
   };
 
-  const toggleAudio = (ayah: Ayah) => {
-    if (playingFull) stopAll();
-    if (playingAyah === ayah.numberInSurah) {
-      audioRef.current?.pause();
-      setPlayingAyah(null);
+  const playAyahAt = (index: number, isContinuous: boolean) => {
+    if (index >= ayahs.length || index < 0) {
+      stopAll();
       return;
     }
-    if (audioRef.current) audioRef.current.pause();
+
+    const ayah = ayahs[index];
+
+    // إيقاف أي صوت سابق وتنظيفه
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.onended = null;
+    }
+
     const audio = new Audio(ayah.audio);
+    audio.preload = "auto";
     audioRef.current = audio;
-    audio.play();
     setPlayingAyah(ayah.numberInSurah);
-    audio.onended = () => setPlayingAyah(null);
+
+    audio.play().catch(() => {
+      if (isContinuous) playAyahAt(index + 1, true);
+    });
+
+    audio.onended = () => {
+      // التحقق من حالة التشغيل المستمر قبل الانتقال للآية التالية
+      if (isContinuous && fullPlayIndexRef.current !== -1) {
+        const nextIndex = index + 1;
+        fullPlayIndexRef.current = nextIndex;
+        playAyahAt(nextIndex, true);
+      } else {
+        setPlayingAyah(null);
+        setPlayingFull(false);
+      }
+    };
   };
 
-  const playFullSurah = () => {
+  const toggleFullPlay = () => {
     if (playingFull) {
       stopAll();
-      return;
+    } else {
+      setPlayingFull(true);
+      fullPlayIndexRef.current = 0;
+      playAyahAt(0, true);
     }
-    if (ayahs.length === 0) return;
-    setPlayingFull(true);
-    fullPlayIndexRef.current = 0;
-    playAyahAt(0);
   };
 
-  const playAyahAt = (index: number) => {
-    if (index >= ayahs.length) {
+  const handleSingleAyahToggle = (index: number, ayahNumber: number) => {
+    if (playingAyah === ayahNumber) {
       stopAll();
-      return;
+    } else {
+      setPlayingFull(false); // نضمن إيقاف التشغيل المستمر
+      playAyahAt(index, false); // تشغيل آية واحدة فقط
     }
-    const ayah = ayahs[index];
-    if (audioRef.current) audioRef.current.pause();
-    const audio = new Audio(ayah.audio);
-    audioRef.current = audio;
-    setPlayingAyah(ayah.numberInSurah);
-    audio.play();
-    audio.onended = () => {
-      const next = fullPlayIndexRef.current + 1;
-      fullPlayIndexRef.current = next;
-      playAyahAt(next);
-    };
   };
-
-  useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-      fullPlayIndexRef.current = -1;
-    };
-  }, []);
 
   if (selectedSurah) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 animate-in fade-in duration-300">
         <button
           onClick={() => {
             stopAll();
             setSelectedSurah(null);
-            setAyahs([]);
           }}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft size={16} />
-          {lang === "ar" ? "رجوع" : "Back"}
+          <ArrowLeft size={16} /> {lang === "ar" ? "رجوع" : "Back"}
         </button>
 
-        <div className="text-center space-y-1">
-          <h2 className="font-amiri text-2xl font-bold text-foreground">
+        <div className="text-center space-y-2">
+          <h2 className="font-amiri text-3xl font-bold text-primary">
             {selectedSurah.name}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            {selectedSurah.englishName} — {selectedSurah.englishNameTranslation}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {selectedSurah.numberOfAyahs} {lang === "ar" ? "آية" : "Ayahs"} · {selectedSurah.revelationType}
-          </p>
+          <button
+            onClick={toggleFullPlay}
+            className="flex items-center gap-2 mx-auto bg-primary text-primary-foreground px-6 py-2.5 rounded-full text-sm font-bold shadow-lg hover:scale-105 transition-transform active:scale-95"
+          >
+            {playingFull ? <Pause size={18} /> : <Play size={18} />}
+            {playingFull
+              ? lang === "ar"
+                ? "إيقاف التشغيل"
+                : "Stop"
+              : lang === "ar"
+                ? "استماع للسورة"
+                : "Listen to Surah"}
+          </button>
         </div>
 
-        {!loadingAyahs && ayahs.length > 0 && (
-          <div className="flex justify-center">
-            <button
-              onClick={playFullSurah}
-              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              {playingFull ? <Pause size={16} /> : <Play size={16} />}
-              {playingFull
-                ? (lang === "ar" ? "إيقاف" : "Stop")
-                : (lang === "ar" ? "تشغيل السورة كاملة" : "Play Full Surah")}
-            </button>
-          </div>
-        )}
-
         {loadingAyahs ? (
-          <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         ) : (
-          <ScrollArea className="h-[calc(100vh-280px)]">
-            <div className="space-y-3 pb-4">
-              {ayahs.map((ayah) => (
+          <ScrollArea className="h-[calc(100vh-280px)] px-2">
+            <div className="space-y-3 pb-10">
+              {ayahs.map((ayah, i) => (
                 <div
-                  key={ayah.number}
-                  className="rounded-xl border border-border bg-card p-4 transition-all hover:border-accent/50"
+                  key={i}
+                  className={`p-5 rounded-2xl border transition-all duration-300 ${playingAyah === ayah.numberInSurah ? "border-primary bg-primary/5 shadow-md" : "border-border bg-card"}`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-[10px] font-bold bg-primary/10 text-primary w-6 h-6 flex items-center justify-center rounded-full">
                       {ayah.numberInSurah}
                     </span>
                     <button
-                      onClick={() => toggleAudio(ayah)}
-                      className="shrink-0 rounded-full bg-accent/20 p-2 text-accent transition-colors hover:bg-accent/30"
+                      onClick={() =>
+                        handleSingleAyahToggle(i, ayah.numberInSurah)
+                      }
+                      className="text-primary p-1.5 hover:bg-primary/10 rounded-full transition-colors"
                     >
-                      {playingAyah === ayah.numberInSurah ? <Pause size={14} /> : <Play size={14} />}
+                      {playingAyah === ayah.numberInSurah ? (
+                        <Pause size={18} />
+                      ) : (
+                        <Play size={18} />
+                      )}
                     </button>
                   </div>
-                  <p className="mt-3 text-right font-amiri text-xl leading-loose text-foreground" dir="rtl">
+                  <p
+                    className="text-right font-amiri text-2xl leading-[1.8] text-foreground"
+                    dir="rtl"
+                  >
                     {ayah.text}
                   </p>
                 </div>
@@ -187,56 +216,66 @@ const QuranView = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <BookOpenText size={24} className="text-accent" />
-        <h1 className="font-amiri text-2xl font-bold text-foreground">
-          {lang === "ar" ? "القرآن الكريم" : "Holy Quran"}
-        </h1>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        {lang === "ar" ? "اختر سورة للقراءة والاستماع" : "Select a Surah to read and listen"}
-      </p>
-
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+    <div className="space-y-5 animate-in fade-in duration-300">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-primary/10 rounded-lg text-primary">
+          <BookOpenText size={28} />
         </div>
-      ) : (
-        <ScrollArea className="h-[calc(100vh-240px)]">
-          <div className="space-y-2 pb-4">
-            {surahs.map((surah) => (
-              <button
-                key={surah.number}
-                onClick={() => openSurah(surah)}
-                className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-accent hover:shadow-sm"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-                  {surah.number}
+        <div>
+          <h1 className="font-amiri text-2xl font-bold">
+            {lang === "ar" ? "القرآن الكريم" : "Holy Quran"}
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            بصوت الشيخ مشاري العفاسي
+          </p>
+        </div>
+      </div>
+
+      <div className="relative">
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          size={18}
+        />
+        <Input
+          placeholder={
+            lang === "ar" ? "ابحث باسم السورة..." : "Search surah..."
+          }
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 h-12 rounded-2xl bg-card"
+        />
+        {searchQuery && (
+          <X
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+            size={16}
+            onClick={() => setSearchQuery("")}
+          />
+        )}
+      </div>
+
+      <ScrollArea className="h-[calc(100vh-280px)]">
+        <div className="grid grid-cols-1 gap-3">
+          {filteredSurahs.map((s) => (
+            <button
+              key={s.number}
+              onClick={() => openSurah(s)}
+              className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <span className="w-10 h-10 flex items-center justify-center bg-secondary text-secondary-foreground rounded-xl text-xs font-bold group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  {s.number}
                 </span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-foreground truncate">
-                      {surah.englishName}
-                    </span>
-                    <span className="font-amiri text-base font-bold text-foreground" dir="rtl">
-                      {surah.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground truncate">
-                      {surah.englishNameTranslation}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {surah.numberOfAyahs} {lang === "ar" ? "آية" : "Ayahs"}
-                    </span>
-                  </div>
+                <div className="text-left">
+                  <span className="text-sm font-bold block">
+                    {s.englishName}
+                  </span>
                 </div>
-              </button>
-            ))}
-          </div>
-        </ScrollArea>
-      )}
+              </div>
+              <span className="font-amiri font-bold text-xl">{s.name}</span>
+            </button>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 };

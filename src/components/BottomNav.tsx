@@ -10,13 +10,13 @@ interface BottomNavProps {
 const tabs = [
   { id: "home", labelKey: "home" as const, icon: Home },
   { id: "prayer", labelKey: "prayer" as const, icon: Clock },
-  { id: "tasbih", labelKey: "tasbih" as const, icon: Hand },
+  { id: "tasbih", labelKey: "tasbih" as const, icon: Hand }, // سنبقي المفتاح كما هو ونغير العرض بالأسفل
   { id: "quran", labelKey: "quran" as const, icon: BookOpenText },
   { id: "learn", labelKey: "learn" as const, icon: BookOpen },
 ];
 
 const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage(); // تأكدنا من استخراج lang هنا
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-lg">
@@ -24,18 +24,32 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
+
+          // تحديد النص الذي سيظهر بناءً على اللغة وقيمة الـ Tab
+          const label =
+            tab.id === "tasbih"
+              ? lang === "ar"
+                ? "تسبيح وأذكار"
+                : "Dhikr & Tasbih"
+              : t(tab.labelKey);
+
           return (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-4 py-1.5 transition-all duration-200",
-                isActive ? "text-accent" : "text-muted-foreground"
+                "flex flex-col items-center gap-0.5 px-2 py-1.5 transition-all duration-200",
+                isActive ? "text-accent" : "text-muted-foreground",
               )}
             >
               <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
-              <span className={cn("text-[10px]", isActive && "font-semibold")}>
-                {t(tab.labelKey)}
+              <span
+                className={cn(
+                  "text-[9px] whitespace-nowrap text-center leading-tight",
+                  isActive && "font-semibold",
+                )}
+              >
+                {label}
               </span>
             </button>
           );
