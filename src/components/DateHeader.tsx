@@ -1,5 +1,13 @@
-import { useState, useEffect } from "react";
-import { Star, Calendar, Sun, Moon, CloudSun, Sunrise } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import {
+  Star,
+  Calendar,
+  Sun,
+  Moon,
+  CloudSun,
+  Sunrise,
+  Cloud,
+} from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const DateHeader = () => {
@@ -11,122 +19,134 @@ const DateHeader = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // 1. التاريخ الميلادي
   const gregorian = today.toLocaleDateString(
     lang === "ar" ? "ar-SA" : "en-US",
-    {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
+    { weekday: "long", year: "numeric", month: "long", day: "numeric" },
   );
 
-  // 2. التاريخ الهجري مع الحماية من الأخطاء (Safe Parsing)
   let finalHijri = "";
   try {
     const hijriDate = new Intl.DateTimeFormat(
       lang === "ar"
         ? "ar-SA-u-ca-islamic-umalqura"
         : "en-US-u-ca-islamic-umalqura",
-      {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      },
+      { day: "numeric", month: "long", year: "numeric" },
     ).format(today);
-
-    const hasSuffix = hijriDate.includes("هـ") || hijriDate.includes("AH");
-    finalHijri = hasSuffix
-      ? hijriDate
-      : `${hijriDate} ${lang === "ar" ? "هـ" : "AH"}`;
-  } catch (error) {
-    console.warn(
-      "Umalqura calendar not supported, falling back to standard hijri",
-    );
-    try {
-      // حل بديل في حال فشل أم القرى: استخدام التقويم الهجري العادي
-      const fallbackHijri = new Intl.DateTimeFormat(
-        lang === "ar" ? "ar-SA-u-ca-islamic" : "en-US-u-ca-islamic",
-        {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        },
-      ).format(today);
-      finalHijri = fallbackHijri;
-    } catch (e) {
-      // حل أخير إذا تعطلت كل التقاويم الهجرية في المتصفح، يظهر التاريخ الميلادي فقط لمنع الـ Crash
-      finalHijri = gregorian;
-    }
+    finalHijri =
+      hijriDate.includes("هـ") || hijriDate.includes("AH")
+        ? hijriDate
+        : `${hijriDate} ${lang === "ar" ? "هـ" : "AH"}`;
+  } catch (e) {
+    finalHijri = gregorian;
   }
 
   const currentHour = today.getHours();
 
-  const getDynamicContent = () => {
-    if (currentHour >= 4 && currentHour < 12) {
-      return {
-        text: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ",
-        icon: <Sunrise size={24} className="text-amber-300" />,
-        bgGradient: "from-sky-500 to-amber-500",
-      };
-    }
-    if (currentHour >= 16 && currentHour < 20) {
-      return {
-        text: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ",
-        icon: <CloudSun size={24} className="text-orange-300" />,
-        bgGradient: "from-orange-600 to-slate-800",
-      };
-    }
-    if (currentHour >= 20 || currentHour < 4) {
-      return {
-        text: "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي",
-        icon: <Moon size={24} className="text-blue-200" />,
-        bgGradient: "from-slate-800 to-indigo-950",
-      };
-    }
-    const daytimeAthkar = [
-      "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
-      "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
-      "أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ",
-      "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
-    ];
-    const randomIndex = today.getMinutes() % daytimeAthkar.length;
+  // تحديد نوع الأيقونة بناءً على الوقت
+  const theme = useMemo(() => {
+    if (currentHour >= 5 && currentHour < 11) return "morning"; // صباح: سحب
+    if (currentHour >= 11 && currentHour < 16) return "noon"; // ظهر: شمس
+    if (currentHour >= 16 && currentHour < 19) return "evening"; // مغرب: سحب وشمس
+    return "night"; // ليل: عشوائي نجوم/أهلة
+  }, [currentHour]);
 
-    return {
-      text: daytimeAthkar[randomIndex],
-      icon: <Sun size={24} className="text-yellow-300" />,
-      bgGradient: "from-primary to-sky-600",
+  const getDynamicContent = () => {
+    const isAr = lang === "ar";
+
+    // إعدادات الثيم البصري
+    const config = {
+      morning: {
+        text: isAr
+          ? "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ"
+          : "THE KINGDOM BELONGS TO ALLAH",
+        mainIcon: <Sunrise size={24} className="text-amber-300" />,
+        patternIcon: <Cloud size={14} />,
+        bigIcon: <Cloud size={220} />,
+        bg: "from-sky-500 to-blue-600",
+      },
+      noon: {
+        text: isAr ? "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ" : "GLORY BE TO ALLAH",
+        mainIcon: <Sun size={24} className="text-yellow-300" />,
+        patternIcon: <Sun size={14} />,
+        bigIcon: <Sun size={220} />,
+        bg: "from-blue-500 to-cyan-500",
+      },
+      evening: {
+        text: isAr
+          ? "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ"
+          : "EVENING HAS COME FOR ALLAH",
+        mainIcon: <CloudSun size={24} className="text-orange-300" />,
+        patternIcon: <Cloud size={14} />,
+        bigIcon: <CloudSun size={220} />,
+        bg: "from-orange-600 to-slate-800",
+      },
+      night: {
+        text: isAr
+          ? "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي"
+          : "IN YOUR NAME MY LORD I LAY DOWN",
+        mainIcon: <Moon size={24} className="text-blue-200" />,
+        patternIcon:
+          Math.random() > 0.5 ? <Star size={14} /> : <Moon size={14} />,
+        bigIcon:
+          Math.random() > 0.5 ? <Star size={220} /> : <Moon size={220} />,
+        bg: "from-slate-900 to-indigo-950",
+      },
     };
+
+    return config[theme];
   };
 
-  const timeContent = getDynamicContent();
+  const content = getDynamicContent();
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${timeContent.bgGradient} p-6 text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-500`}
+      className={`relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br ${content.bg} p-8 text-primary-foreground shadow-2xl transition-all duration-1000 min-h-[230px] flex flex-col justify-between`}
     >
-      <div className="absolute -right-6 -top-6 opacity-10 rotate-12">
-        <Star size={140} />
+      {/* 1. الزخرفة الخلفية (النمط المتغير) */}
+      <div className="absolute inset-0 opacity-[0.12] grid grid-cols-10 gap-2 p-2 pointer-events-none rotate-[15deg]">
+        {[...Array(80)].map((_, i) => (
+          <div key={i} className="flex justify-center items-center text-white">
+            {content.patternIcon}
+          </div>
+        ))}
       </div>
 
-      <div className="mb-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
+      {/* 2. الأيقونة الكبيرة المتغيرة */}
+      <div className="absolute -right-12 -top-16 opacity-20 rotate-[20deg] scale-125 text-white pointer-events-none">
+        {content.bigIcon}
+      </div>
+
+      {/* 3. المحتوى العلوي */}
+      <div className="relative z-10 space-y-1">
+        <p className="text-[10px] font-sans font-light uppercase tracking-[0.4em] text-white/60">
           {gregorian}
         </p>
+        <div className="flex items-center gap-3">
+          <Calendar size={16} className="text-accent/80" />
+          <p className="font-sans text-lg font-medium text-white tracking-tight">
+            {finalHijri}
+          </p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Calendar size={18} className="text-accent shrink-0" />
-        <p className="font-amiri text-2xl font-bold text-white leading-tight">
-          {finalHijri}
-        </p>
-      </div>
+      {/* 4. قسم الذكر مع الأيقونة المرتفعة والموحدة */}
+      <div className="mt-8 flex flex-col items-center border-t border-white/10 pt-8 relative z-10">
+        <div className="absolute -top-4 bg-white/5 backdrop-blur-md p-2 rounded-full border border-white/10 transform transition-transform hover:scale-110 duration-500">
+          {content.mainIcon}
+        </div>
 
-      <div className="mt-4 flex flex-col items-center border-t border-white/10 pt-4 animate-in fade-in duration-500">
-        <div className="mb-1">{timeContent.icon}</div>
-        <p className="font-amiri text-xl font-bold text-accent drop-shadow-sm text-center">
-          {timeContent.text}
+        <p
+          className={`
+          text-center leading-none uppercase mt-2
+          ${
+            lang === "ar"
+              ? "font-amiri text-[1.3rem] font-bold text-accent px-2"
+              : "font-sans text-[12px] font-medium tracking-[0.3em] text-accent/90 whitespace-nowrap"
+          } 
+          drop-shadow-lg transition-all duration-500
+        `}
+        >
+          {content.text}
         </p>
       </div>
     </div>
