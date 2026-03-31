@@ -15,6 +15,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils"; // تأكد من وجود مكتبة cn لتسهيل دمج الـ classes
 
 interface Surah {
   number: number;
@@ -34,7 +35,7 @@ const QuranView = () => {
   const { lang } = useLanguage();
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [ayahSearchQuery, setAyahSearchQuery] = useState(""); // بحث الآيات
+  const [ayahSearchQuery, setAyahSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
@@ -121,7 +122,6 @@ const QuranView = () => {
       const element = ayahRefs.current[index];
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "center" });
-        // إضافة تأثير وميض (Glow) بسيط للآية التي تم البحث عنها
         element.classList.add("ring-2", "ring-primary", "ring-offset-2");
         setTimeout(() => {
           element.classList.remove("ring-2", "ring-primary", "ring-offset-2");
@@ -130,7 +130,6 @@ const QuranView = () => {
     }, 100);
   };
 
-  // دالة البحث عن آية محددة بالتمرير
   const handleAyahSearch = (val: string) => {
     setAyahSearchQuery(val);
     const num = parseInt(val);
@@ -142,7 +141,7 @@ const QuranView = () => {
   const openSurah = async (surah: Surah, autoPlayIndex?: number) => {
     stopAll();
     setSelectedSurah(surah);
-    setAyahSearchQuery(""); // تصغير بحث الآيات عند فتح سورة جديدة
+    setAyahSearchQuery("");
     setLoadingAyahs(true);
     try {
       const res = await fetch(
@@ -243,21 +242,30 @@ const QuranView = () => {
             }}
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft size={16} /> {lang === "ar" ? "رجوع" : "Back"}
+            <ArrowLeft
+              size={16}
+              className={lang === "ar" ? "" : "rotate-180"}
+            />{" "}
+            {lang === "ar" ? "رجوع" : "Back"}
           </button>
 
-          {/* شريط البحث عن آية - يظهر فقط داخل السورة */}
           <div className="relative w-32 animate-in slide-in-from-right-2">
             <Hash
-              className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2 text-muted-foreground",
+                lang === "ar" ? "right-2" : "left-2",
+              )}
               size={14}
             />
             <Input
               type="number"
-              placeholder={lang === "ar" ? "رقم الآية" : "Ayah "}
+              placeholder={lang === "ar" ? "رقم الآية" : "Ayah"}
               value={ayahSearchQuery}
               onChange={(e) => handleAyahSearch(e.target.value)}
-              className="pl-7 h-8 text-xs rounded-full bg-secondary/50 border-none focus-visible:ring-1 focus-visible:ring-primary"
+              className={cn(
+                "h-8 text-xs rounded-full bg-secondary/50 border-none focus-visible:ring-1 focus-visible:ring-primary",
+                lang === "ar" ? "pr-7 text-right" : "pl-7 text-left",
+              )}
             />
           </div>
         </div>
@@ -317,7 +325,12 @@ const QuranView = () => {
                 <div
                   key={i}
                   ref={(el) => (ayahRefs.current[i] = el)}
-                  className={`p-5 rounded-2xl border transition-all duration-300 ${playingAyah === ayah.numberInSurah ? "border-primary bg-primary/5 shadow-md" : "border-border bg-card"}`}
+                  className={cn(
+                    "p-5 rounded-2xl border transition-all duration-300",
+                    playingAyah === ayah.numberInSurah
+                      ? "border-primary bg-primary/5 shadow-md"
+                      : "border-border bg-card",
+                  )}
                 >
                   <div className="flex justify-between items-start mb-3">
                     <span className="text-[10px] font-bold bg-primary/10 text-primary w-6 h-6 flex items-center justify-center rounded-full">
@@ -328,7 +341,12 @@ const QuranView = () => {
                         onClick={() =>
                           handleAyahAction(i, ayah.numberInSurah, false)
                         }
-                        className={`p-1.5 rounded-full transition-colors ${playingAyah === ayah.numberInSurah && !playingFull ? "bg-primary text-white" : "text-muted-foreground hover:bg-primary/10 hover:text-primary"}`}
+                        className={cn(
+                          "p-1.5 rounded-full transition-colors",
+                          playingAyah === ayah.numberInSurah && !playingFull
+                            ? "bg-primary text-white"
+                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary",
+                        )}
                       >
                         {playingAyah === ayah.numberInSurah && !playingFull ? (
                           isPaused ? (
@@ -345,7 +363,12 @@ const QuranView = () => {
                         onClick={() =>
                           handleAyahAction(i, ayah.numberInSurah, true)
                         }
-                        className={`p-1.5 rounded-full transition-colors ${playingAyah === ayah.numberInSurah && playingFull ? "bg-primary text-white" : "text-primary hover:bg-primary/10"}`}
+                        className={cn(
+                          "p-1.5 rounded-full transition-colors",
+                          playingAyah === ayah.numberInSurah && playingFull
+                            ? "bg-primary text-white"
+                            : "text-primary hover:bg-primary/10",
+                        )}
                       >
                         {playingAyah === ayah.numberInSurah && playingFull ? (
                           isPaused ? (
@@ -396,7 +419,7 @@ const QuranView = () => {
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <Bookmark size={16} />
             </div>
-            <div>
+            <div className={lang === "ar" ? "text-right" : "text-left"}>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                 {lang === "ar" ? "واصل القراءة" : "Continue Reading"}
               </p>
@@ -411,16 +434,20 @@ const QuranView = () => {
           </div>
           <button
             onClick={() => openSurah(lastSaved.surah, lastSaved.index)}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-xs font-bold shadow-sm"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition-transform"
           >
             {lang === "ar" ? "استكمال" : "Continue"}
           </button>
         </div>
       )}
 
-      <div className="relative">
+      {/* شريط البحث المحدث */}
+      <div className="relative group">
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className={cn(
+            "absolute top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary",
+            lang === "ar" ? "right-3" : "left-3",
+          )}
           size={18}
         />
         <Input
@@ -429,14 +456,23 @@ const QuranView = () => {
           }
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 h-12 rounded-2xl bg-card"
+          className={cn(
+            "h-12 rounded-2xl bg-card transition-all",
+            lang === "ar"
+              ? "pr-10 pl-10 text-right font-amiri"
+              : "pl-10 pr-10 text-left",
+          )}
         />
         {searchQuery && (
-          <X
-            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-            size={16}
+          <button
             onClick={() => setSearchQuery("")}
-          />
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 p-1 hover:bg-secondary rounded-full",
+              lang === "ar" ? "left-3" : "right-3",
+            )}
+          >
+            <X size={16} className="text-muted-foreground" />
+          </button>
         )}
       </div>
 
@@ -446,7 +482,7 @@ const QuranView = () => {
             <button
               key={s.number}
               onClick={() => openSurah(s)}
-              className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary transition-all group"
+              className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary transition-all group active:scale-[0.98]"
             >
               <div className="flex items-center gap-4">
                 <span className="w-10 h-10 flex items-center justify-center bg-secondary text-secondary-foreground rounded-xl text-xs font-bold group-hover:bg-primary group-hover:text-primary-foreground transition-colors">

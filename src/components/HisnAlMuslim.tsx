@@ -10,7 +10,6 @@ import {
   DoorOpen,
   HelpCircle,
   Sparkles,
-  Search,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -32,54 +31,162 @@ interface AdhkarCategory {
 const ADHKAR_DATA: AdhkarCategory[] = [
   {
     id: 1,
-    categoryAr: "أذكار الصباح (كاملة)",
-    categoryEn: "Morning Adhkar (Full)",
+    categoryAr: "أذكار الصباح",
+    categoryEn: "Morning Adhkar",
     icon: <SunMedium className="text-orange-400" />,
     items: [
       {
-        textAr: "أَصْبَحْنَا وَأَصْبَحَ المُلْكُ للهِ، وَالحَمْدُ للهِ...",
+        textAr:
+          "أَصْبَحْنَا وَأَصْبَحَ المُلْكُ للهِ، وَالحَمْدُ للهِ، لاَ إِلَهَ إلاَّ اللهُ وَحْدَهُ لاَ شريكَ لَهُ، لَهُ المُلْكُ وَلَهُ الحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ.",
         textEn:
-          "We have reached the morning and at this very time unto Allah belongs all sovereignty...",
-      },
-      {
-        textAr: "اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك...",
-        textEn:
-          "O Allah, You are my Lord, there is none worthy of worship but You...",
+          "We have reached the morning and at this very time unto Allah belongs all sovereignty, and all praise is for Allah. There is none worthy of worship but Allah alone, without partner.",
       },
       {
         textAr:
-          "اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ (آية الكرسي)",
+          "اللهم بك أصبحنا، وبك أمسينا، وبك نحيا، وبك نموت، وإليك النشور.",
         textEn:
-          "Allah! There is no god but He, the Living, the Self-subsisting...",
+          "O Allah, by You we enter the morning and by You we enter the evening, by You we live and by You we die, and unto You is the resurrection.",
       },
       {
-        textAr: "بِسْمِ اللهِ الَّذِي لاَ يَضُرُّ مَعَ اسْمِهِ شَيْءٌ...",
-        textEn: "In the Name of Allah with Whose Name nothing is harmed...",
+        textAr:
+          "اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك علي، وأبوء بذنبي فاغفر لي فإنه لا يغفر الذنوب إلا أنت.",
+        textEn:
+          "O Allah, You are my Lord, there is none worthy of worship but You. You created me and I am Your slave. I abide by Your covenant and promise as best I can.",
+      },
+      {
+        textAr:
+          "اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ.",
+        textEn:
+          "Allah! There is no god but He, the Living, the Self-subsisting. Neither slumber nor sleep seizes Him. To Him belongs whatever is in the heavens and whatever is on the earth.",
+      },
+      {
+        textAr:
+          "بِسْمِ اللهِ الَّذِي لاَ يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الأَرْضِ وَلاَ فِي السَّمَاءِ وَهُوَ السَّمِيعُ العَلِيمُ. (3 مرات)",
+        textEn:
+          "In the Name of Allah with Whose Name nothing is harmed on Earth nor in the heaven, and He is the All-Hearing, the All-Knowing. (3 times)",
+      },
+      {
+        textAr:
+          "يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله ولا تكلني إلى نفسي طرفة عين.",
+        textEn:
+          "O Ever Living One, O Eternal One, by Your mercy I call on You to set right all my affairs. Do not leave me to myself even for the blink of an eye.",
       },
     ],
   },
   {
     id: 2,
-    categoryAr: "أذكار المساء (كاملة)",
-    categoryEn: "Evening Adhkar (Full)",
+    categoryAr: "أذكار المساء",
+    categoryEn: "Evening Adhkar",
     icon: <CloudMoon className="text-blue-500" />,
     items: [
       {
-        textAr: "أَمْسَيْنَا وَأَمْسَى المُلْكُ للهِ، وَالحَمْدُ للهِ...",
+        textAr:
+          "أَمْسَيْنَا وَأَمْسَى المُلْكُ للهِ، وَالحَمْدُ للهِ، لاَ إِلَهَ إلاَّ اللهُ وَحْدَهُ لاَ شريكَ لَهُ، لَهُ المُلْكُ وَلَهُ الحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ.",
         textEn:
-          "We have reached the evening and at this very time unto Allah belongs all sovereignty...",
+          "We have reached the evening and at this very time unto Allah belongs all sovereignty, and all praise is for Allah.",
       },
       {
-        textAr: "اللهم بك أمسينا، وبك أصبحنا، وبك نحيا...",
+        textAr:
+          "اللهم بك أمسينا، وبك أصبحنا، وبك نحيا، وبك نموت، وإليك المصير.",
         textEn:
-          "O Allah, by You we enter the evening and by You we enter the morning...",
+          "O Allah, by You we enter the evening and by You we enter the morning, by You we live and by You we die, and unto You is the final return.",
+      },
+      {
+        textAr: "أعوذ بكلمات الله التامات من شر ما خلق. (3 مرات)",
+        textEn:
+          "I seek refuge in the perfect words of Allah from the evil of what He has created. (3 times)",
+      },
+      {
+        textAr:
+          "اللهم إنا نعوذ بك من أن نشرك بك شيئاً نعلمه، ونستغفرك لما لا نعلمه.",
+        textEn:
+          "O Allah, we seek refuge in You from knowingly associating anything with You, and we seek Your forgiveness for that which we do not know.",
       },
     ],
   },
   {
     id: 3,
-    categoryAr: "أدعية الحرب والشدائد والخوف",
-    categoryEn: "Dua for Hardship & Fear",
+    categoryAr: "الهم والكرب والحزن",
+    categoryEn: "Grief & Anxiety",
+    icon: <HelpCircle className="text-amber-600" />,
+    items: [
+      {
+        textAr:
+          "لا إله إلا الله العظيم الحليم، لا إله إلا الله رب العرش العظيم، لا إله إلا الله رب السماوات ورب الأرض ورب العرش الكريم.",
+        textEn:
+          "There is no deity but Allah, the Great, the Forbearing. There is no deity but Allah, Lord of the Magnificent Throne.",
+      },
+      {
+        textAr: "لا إله إلا أنت سبحانك إني كنت من الظالمين.",
+        textEn:
+          "There is no deity but You. Glory be to You! I have been among the wrongdoers.",
+      },
+      {
+        textAr: "يا حي يا قيوم برحمتك أستغيث.",
+        textEn:
+          "O Ever Living One, O Eternal One, by Your mercy I call on You.",
+      },
+    ],
+  },
+  {
+    id: 4,
+    categoryAr: "السفر وركوب السيارة",
+    categoryEn: "Travel & Riding",
+    icon: <Car className="text-sky-500" />,
+    items: [
+      {
+        textAr:
+          "سبحان الذي سخر لنا هذا وما كنا له مقرنين وإنا إلى ربنا لمنقلبون.",
+        textEn:
+          "Glory is to Him Who has provided this for us, though we could never have subdued it by ourselves.",
+      },
+      {
+        textAr:
+          "اللهم إنا نسألك في سفرنا هذا البر والتقوى، ومن العمل ما ترضى، اللهم هون علينا سفرنا هذا واطوِ عنا بعده.",
+        textEn:
+          "O Allah, we ask You on this journey of ours for goodness and piety, and for works that are pleasing to You.",
+      },
+    ],
+  },
+  {
+    id: 5,
+    categoryAr: "المطر والرعد والريح",
+    categoryEn: "Nature (Rain & Wind)",
+    icon: <CloudRain className="text-cyan-500" />,
+    items: [
+      {
+        textAr: "اللهم صيباً نافعاً.",
+        textEn: "O Allah, may it be a beneficial rain.",
+      },
+      {
+        textAr: "سبحان الذي يسبح الرعد بحمده والملائكة من خيفته.",
+        textEn:
+          "Glory is to Him Whom the thunder glorifies with His praise and the angels glorify Him from fear of Him.",
+      },
+    ],
+  },
+  {
+    id: 6,
+    categoryAr: "أذكار المنزل والمسجد",
+    categoryEn: "Home & Mosque",
+    icon: <DoorOpen className="text-stone-500" />,
+    items: [
+      {
+        textAr:
+          "بِسْـمِ اللهِ وَلَجْنـا، وَبِسْـمِ اللهِ خَـرَجْنـا، وَعَلـى رَبِّنـا تَوَكَّلْـنا.",
+        textEn:
+          "In the name of Allah we enter, and in the name of Allah we leave, and upon our Lord we rely.",
+      },
+      {
+        textAr: "اللهم افتح لي أبواب رحمتك.",
+        textEn: "O Allah, open the gates of Your mercy for me.",
+      },
+    ],
+  },
+  {
+    id: 7,
+    categoryAr: "أدعية الحرب والشدائد",
+    categoryEn: "Hardship & Fear",
     icon: <ShieldAlert className="text-red-600" />,
     items: [
       {
@@ -88,94 +195,26 @@ const ADHKAR_DATA: AdhkarCategory[] = [
           "Allah is sufficient for us and He is the best Disposer of affairs.",
       },
       {
-        textAr: "اللهم إنا نجعلك في نحورهم، ونعوذ بك من شرورهم.",
-        textEn:
-          "O Allah, we ask You to restrain them by their necks and we seek refuge in You from their evil.",
-      },
-    ],
-  },
-  {
-    id: 4,
-    categoryAr: "المطر والرعد والريح",
-    categoryEn: "Rain, Thunder & Wind",
-    icon: <CloudRain className="text-cyan-500" />,
-    items: [
-      {
-        textAr: "اللهم صيباً نافعاً.",
-        textEn: "O Allah, may it be a beneficial rain.",
-      },
-      {
-        textAr: "سبحان الذي يسبح الرعد بحمده.",
-        textEn: "Glory is to Him Whom the thunder glorifies with His praise.",
-      },
-    ],
-  },
-  {
-    id: 5,
-    categoryAr: "السفر وركوب السيارة",
-    categoryEn: "Travel & Riding",
-    icon: <Car className="text-sky-500" />,
-    items: [
-      {
-        textAr: "سبحان الذي سخر لنا هذا وما كنا له مقرنين.",
-        textEn:
-          "Glory to Him Who has brought this [vehicle] under our control.",
-      },
-      {
-        textAr: "اللهم أنت الصاحب في السفر والخليفة في الأهل.",
-        textEn:
-          "O Allah, You are the Companion on the journey and the Successor over the family.",
-      },
-    ],
-  },
-  {
-    id: 6,
-    categoryAr: "الحج والعمرة",
-    categoryEn: "Hajj & Umrah",
-    icon: <MapPin className="text-emerald-600" />,
-    items: [
-      {
-        textAr: "لبيك اللهم لبيك، لبيك لا شريك لك لبيك.",
-        textEn: "I am at Your service, O Allah, I am at Your service.",
-      },
-    ],
-  },
-  {
-    id: 7,
-    categoryAr: "أذكار المنزل والمسجد",
-    categoryEn: "Home & Mosque Adhkar",
-    icon: <DoorOpen className="text-stone-500" />,
-    items: [
-      {
-        textAr: "بسم الله ولجنا، وبسم الله خرجنا.",
-        textEn:
-          "In the name of Allah we enter, and in the name of Allah we leave.",
+        textAr: "اللهم اكفناهم بما شئت.",
+        textEn: "O Allah, suffice us against them as You will.",
       },
     ],
   },
   {
     id: 8,
-    categoryAr: "الهم والكرب والحزن",
-    categoryEn: "Dua for Grief & Anxiety",
-    icon: <HelpCircle className="text-amber-600" />,
-    items: [
-      {
-        textAr: "لا إله إلا أنت سبحانك إني كنت من الظالمين.",
-        textEn:
-          "There is no deity but You. Glory be to You! I have been among the wrongdoers.",
-      },
-    ],
-  },
-  {
-    id: 9,
     categoryAr: "جوامع الدعاء والوالدين",
-    categoryEn: "General Dua & Parents",
+    categoryEn: "General Dua",
     icon: <Sparkles className="text-pink-500" />,
     items: [
       {
         textAr: "رَّبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا.",
         textEn:
-          "My Lord, have mercy upon them as they brought me up [when I was] small.",
+          "My Lord, have mercy upon them as they brought me up when I was small.",
+      },
+      {
+        textAr: "اللهم إنك عفو تحب العفو فاعف عني.",
+        textEn:
+          "O Allah, You are Forgiving and You love forgiveness, so forgive me.",
       },
     ],
   },
