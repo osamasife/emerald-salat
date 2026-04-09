@@ -8,6 +8,8 @@ import IstikharaGuide from "@/components/IstikharaGuide";
 import QuranView from "@/components/QuranView";
 import DateHeader from "@/components/DateHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
+// 1. أضف هذا السطر في الأعلى
+import SupportButton from "@/components/SupportButton";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
@@ -63,7 +65,16 @@ const Index = () => {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-lg px-4 pt-4">{renderContent()}</main>
+
+      <main className="mx-auto max-w-lg px-4 pt-4">
+        {renderContent()}
+
+        {/* 2. وضعنا الزر هنا داخل الـ main ليكون آخر شيء في الصفحة قبل الـ Nav */}
+        <div className="mt-8 mb-4">
+          <SupportButton />
+        </div>
+      </main>
+
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
