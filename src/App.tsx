@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import SupportButton from "./components/SupportButton";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          {/* وضعنا الزر هنا ليظهر في أسفل التطبيق دائماً */}
+          <SupportButton />
         </BrowserRouter>
       </LanguageProvider>
     </TooltipProvider>
